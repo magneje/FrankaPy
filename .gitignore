@@ -129,4 +129,10 @@ dmypy.json
 catkin_ws/devel
 catkin_ws/build
 catkin_ws/logs
+
+# Pickle and mat files
+.pkl
+.mat
 catkin_ws/.catkin_tools
+
+.idea
