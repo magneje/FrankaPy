@@ -1552,6 +1552,93 @@ class FrankaArm:
 
         sleep(FC.DYNAMIC_SKILL_WAIT_TIME)
 
+    def run_dynamic_impedance(self,
+                  duration=3,
+                  buffer_time=FC.DEFAULT_TERM_BUFFER_TIME,
+                  force_thresholds=None,
+                  torque_thresholds=None,
+                  stiffness=FC.DEFAULT_TRANSLATIONAL_STIFFNESSES + FC.DEFAULT_ROTATIONAL_STIFFNESSES,
+                  damping=FC.DEFAULT_VIC_DAMPING,
+                  mass=FC.DEFAULT_VIC_MASS,
+                  use_commanded_damping=False,
+                  use_commanded_mass=True,
+                  ignore_errors=True,
+                  ignore_virtual_walls=True,
+                  skill_desc=''):
+
+        """
+        Commands arm to run dynamic cartesian impedance control
+
+        Parameters
+        ----------
+            duration : :obj:`float`
+                How much time this robot motion should take.
+            buffer_time : :obj:`float`
+                How much extra time the termination handler will wait
+                before stopping the skill after duration has passed.
+            force_thresholds : :obj:`list`
+                List of 6 floats corresponding to force limits on translation
+                (xyz) and rotation about (xyz) axes. Default is None.
+                If None then will not stop on contact.
+            torque_thresholds : :obj:`list`
+                List of 7 floats corresponding to torque limits on each joint.
+                Default is None. If None then will not stop on contact.
+            stiffness : :obj:`list`
+                List of 6 floats corresponding to stiffness for the
+                cartesian variable impedance controller.
+            damping : :obj:`list`
+                List of 6 floats corresponding to damping for the
+                cartesian variable impedance controller.
+            mass : :obj:`list`
+                List of 6 floats corresponding to mass for the
+                cartesian variable impedance controller.
+            use_commanded_damping : :obj:`bool`
+                Whether to use 'damping'. If false, the damping
+                is determined by the feedback_controller.
+            use_commanded_mass : :obj:`bool`
+                Whether to use 'mass'. If false, the mass
+                is determined by the feedback_controller.
+            ignore_errors : :obj:`bool`
+                Function ignores errors by default. If False, errors and some
+                exceptions can be thrown.
+            ignore_virtual_walls : :obj:`bool`
+                Function checks for collisions with virtual walls by default.
+                If False, the robot no longer checks, which may be dangerous.
+            skill_desc : :obj:`str`
+                Skill description to use for logging on control-pc.
+        """
+
+        current_pose = self.get_pose()
+        if not ignore_virtual_walls and np.any([
+            current_pose.translation <= FC.WORKSPACE_WALLS[:, :3].min(axis=0),
+            current_pose.translation >= FC.WORKSPACE_WALLS[:, :3].max(axis=0)]):
+            raise ValueError('Current pose is outside of workspace virtual walls!')
+
+        skill = Skill(SkillType.ImpedanceControlSkill,
+                      TrajectoryGeneratorType.PassThroughPoseTrajectoryGenerator,
+                      feedback_controller_type=FeedbackControllerType.CartesianVariableImpedanceFeedbackController,
+                      termination_handler_type=TerminationHandlerType.TimeTerminationHandler,
+                      skill_desc=skill_desc)
+
+        skill.add_initial_sensor_values(FC.EMPTY_SENSOR_VALUES)
+
+        f_ext_initial = self.get_robot_state()['ee_force_torque']
+        print(f_ext_initial)
+        skill.add_cartesian_variable_impedance_params(stiffness, damping, mass, use_commanded_damping, use_commanded_mass)
+        skill.add_run_time(duration)
+
+        if not skill.check_for_contact_params(buffer_time, force_thresholds, torque_thresholds):
+            skill.add_time_termination_params(buffer_time)
+        skill.add_goal_pose(duration, current_pose)
+        goal = skill.create_goal()
+
+        self._send_goal(goal,
+                        cb=lambda x: skill.feedback_callback(x),
+                        block=False,
+                        ignore_errors=ignore_errors)
+
+        sleep(FC.DYNAMIC_SKILL_WAIT_TIME)
+
     """
     Reads
     """

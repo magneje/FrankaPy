@@ -192,6 +192,22 @@ class Skill:
                 selection=S, use_cartesian_gains=use_cartesian_gains)
         
         self.add_feedback_controller_params(force_position_feedback_controller_msg_proto.SerializeToString())
+
+    def add_cartesian_variable_impedance_params(self, stiffness, damping, mass, use_commanded_damping, use_commanded_mass):
+        assert type(stiffness) is list or len(stiffness) == 6, \
+            "Incorrect stiffness type. Should be list of length 6."  # FIXME: should be 'and'
+        assert type(damping) is list or len(damping) == 6, \
+            "Incorrect damping type. Should be list of length 6."  # FIXME: should be 'and'
+        assert type(mass) is list or len(mass) == 6, \
+            "Incorrect mass type. Should be list of length 6."  # FIXME: should be 'and'
+
+        cartesian_variable_impedance_feedback_controller_msg_proto = \
+            CartesianVariableImpedanceFeedbackControllerMessage(
+                stiffness=stiffness, damping=damping, mass=mass,
+                use_commanded_damping=use_commanded_damping,
+                use_commanded_mass=use_commanded_mass)
+
+        self.add_feedback_controller_params(cartesian_variable_impedance_feedback_controller_msg_proto.SerializeToString())
         
     ## Termination Handlers
 

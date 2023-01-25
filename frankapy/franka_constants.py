@@ -182,3 +182,7 @@ class FrankaConstants:
 
     DEFAULT_HFPC_FORCE_GAIN = [0.1] * 6
     DEFAULT_HFPC_S = [1, 1, 1, 1, 1, 1]
+
+    DEFAULT_VIC_STIFFNESS = [300.0, 300.0, 300.0, 20.0, 20.0, 20.0]
+    DEFAULT_VIC_DAMPING = [2 * math.sqrt(300.0)] * 3 + [2 * math.sqrt(20.0)] * 3
+    DEFAULT_VIC_MASS = [3.0, 3.0, 3.0, 3.0, 3.0, 3.0]
