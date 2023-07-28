@@ -1557,11 +1557,11 @@ class FrankaArm:
                   buffer_time=FC.DEFAULT_TERM_BUFFER_TIME,
                   force_thresholds=None,
                   torque_thresholds=None,
-                  stiffness=FC.DEFAULT_TRANSLATIONAL_STIFFNESSES + FC.DEFAULT_ROTATIONAL_STIFFNESSES,
+                  stiffness=FC.DEFAULT_VIC_STIFFNESS,
                   damping=FC.DEFAULT_VIC_DAMPING,
                   mass=FC.DEFAULT_VIC_MASS,
                   use_commanded_damping=False,
-                  use_commanded_mass=True,
+                  use_commanded_mass=False,
                   ignore_errors=True,
                   ignore_virtual_walls=True,
                   skill_desc=''):

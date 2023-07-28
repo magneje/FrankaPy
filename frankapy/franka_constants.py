@@ -185,4 +185,4 @@ class FrankaConstants:
 
     DEFAULT_VIC_STIFFNESS = [300.0, 300.0, 300.0, 20.0, 20.0, 20.0]
     DEFAULT_VIC_DAMPING = [2 * math.sqrt(300.0)] * 3 + [2 * math.sqrt(20.0)] * 3
-    DEFAULT_VIC_MASS = [3.0, 3.0, 3.0, 3.0, 3.0, 3.0]
+    DEFAULT_VIC_MASS = [1.0]*6
